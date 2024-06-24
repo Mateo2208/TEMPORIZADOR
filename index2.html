@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temporizador de disertaciones</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            transition: background-color 0.5s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin: auto;
+        }
+        .container div {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input[type="time"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            margin-right: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .hidden {
+            display: none;
+        }
+        .timer {
+            font-size: 3em;
+            margin-top: 20px;
+            color: black;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #resetButton {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="settingsContainer">
+        <h1>Temporizador de disertaciones</h1>
+        <div>
+            <label for="totalTime">Tiempo total: </label>
+            <input type="time" id="totalTime" value="00:30" step="1">
+        </div>
+        <button onclick="startTimer()">Iniciar</button>
+    </div>
+    <div class="timer hidden" id="timerDisplay"></div>
+    <button class="hidden" id="resetButton" onclick="resetTimer()">Reiniciar</button>
+
+    <script>
+        let timer;
+        let totalSeconds;
+        let remainingSeconds;
+        const inamovibleSeconds = 15 * 60; // 15 minutos en segundos
+
+        function startTimer() {
+            const timeInput = document.getElementById('totalTime').value.split(':');
+            const hours = parseInt(timeInput[0]) || 0;
+            const minutes = parseInt(timeInput[1]) || 0;
+            const seconds = parseInt(timeInput[2]) || 0;
+            totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
+            if (totalSeconds < inamovibleSeconds) {
+                alert('El tiempo total debe ser al menos 15 minutos.');
+                return;
+            }
+            remainingSeconds = totalSeconds;
+
+            // Ocultar la configuración y mostrar el cronómetro
+            document.getElementById('settingsContainer').classList.add('hidden');
+            document.getElementById('timerDisplay').classList.remove('hidden');
+            document.getElementById('resetButton').classList.remove('hidden');
+
+            updateBackgroundColor();
+            updateTimerDisplay();
+
+            timer = setInterval(() => {
+                remainingSeconds--;
+                if (remainingSeconds <= 0) {
+                    clearInterval(timer);
+                    document.body.style.backgroundColor = 'white';
+                    document.getElementById('timerDisplay').textContent = "Tiempo finalizado";
+                } else {
+                    updateBackgroundColor();
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            document.body.style.backgroundColor = '';
+            document.getElementById('timerDisplay').classList.add('hidden');
+            document.getElementById('resetButton').classList.add('hidden');
+            document.getElementById('settingsContainer').classList.remove('hidden');
+        }
+
+        function updateBackgroundColor() {
+            const redThreshold = 5 * 60; // 5 minutos en segundos
+            const orangeThreshold = 15 * 60; // 15 minutos en segundos
+
+            if (remainingSeconds <= redThreshold) {
+                document.body.style.backgroundColor = 'red';
+            } else if (remainingSeconds <= orangeThreshold) {
+                document.body.style.backgroundColor = 'orange';
+            } else {
+                document.body.style.backgroundColor = 'green';
+            }
+        }
+
+        function updateTimerDisplay() {
+            const hours = Math.floor(remainingSeconds / 3600);
+            const minutes = Math.floor((remainingSeconds % 3600) / 60);
+            const seconds = remainingSeconds % 60;
+            document.getElementById('timerDisplay').textContent = `${hours}:${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+    </script>
+</body>
+</html>
